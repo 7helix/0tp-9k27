@@ -1,0 +1,24 @@
+# /etc/systemd/system/otp-fortress.service   (systemctl enable --now otp-fortress)
+[Unit]
+Description=0TP-F0rtr3ss OTP API
+After=network.target
+
+[Service]
+User=otpf
+WorkingDirectory=/opt/otp-fortress
+EnvironmentFile=/etc/otp-fortress.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node bin/server.js
+Restart=on-failure
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/otp-fortress
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+MemoryDenyWriteExecute=true
+
+[Install]
+WantedBy=multi-user.target

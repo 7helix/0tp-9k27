@@ -1,0 +1,4 @@
+# Security-sensitive paths need maintainer review
+/src/core/       @maintainers
+/src/security/   @maintainers
+/src/otp-types/  @maintainers

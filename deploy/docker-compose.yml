@@ -1,0 +1,15 @@
+# Run:  docker compose -f deploy/docker-compose.yml --env-file .env up --build
+services:
+  otp:
+    build: { context: .., dockerfile: deploy/Dockerfile }
+    ports: ["127.0.0.1:8080:8080"]      # bind to localhost; put a TLS proxy in front (see nginx.conf)
+    env_file: ../.env
+    environment: { NODE_ENV: production }
+    volumes: ["otp-data:/data"]
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+volumes:
+  otp-data:
