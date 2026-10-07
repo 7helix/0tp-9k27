@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0TP-F0rtr3ss - browser authenticator demo</title>
+<style>
+  :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+  body { max-width: 26rem; margin: 3rem auto; padding: 0 1rem; }
+  input, button { font: inherit; padding: .6rem; width: 100%; box-sizing: border-box; margin-top: .5rem; }
+  #code { font-size: 2.6rem; letter-spacing: .25em; text-align: center; margin: 1.2rem 0 .4rem; font-variant-numeric: tabular-nums; }
+  progress { width: 100%; }
+  small { opacity: .7; }
+</style>
+</head>
+<body>
+  <h1>TOTP demo</h1>
+  <p>Paste a Base32 secret (from <code>node bin/otp-cli.js gen-secret</code>). Everything runs locally in your browser via Web Crypto; nothing is sent anywhere.</p>
+  <input id="secret" placeholder="JBSWY3DPEHPK3PXP" autocomplete="off" spellcheck="false">
+  <div id="code" aria-live="polite">------</div>
+  <progress id="bar" max="30" value="30"></progress>
+  <small id="msg">Serve over http://localhost or https (Web Crypto needs a secure context).</small>
+  <script type="module">
+    import { base32ToBytes, totpWeb } from './totp-web.js';
+    const $ = (id) => document.getElementById(id);
+    async function tick() {
+      const remaining = 30 - (Math.floor(Date.now() / 1000) % 30);
+      $('bar').value = remaining;
+      try {
+        const s = $('secret').value.trim();
+        if (!s) { $('code').textContent = '------'; return; }
+        const c = await totpWeb(base32ToBytes(s));
+        $('code').textContent = `${c.slice(0, 3)} ${c.slice(3)}`;
+        $('msg').textContent = `Refreshes in ${remaining}s`;
+      } catch { $('code').textContent = '------'; $('msg').textContent = 'Invalid Base32 secret'; }
+    }
+    setInterval(tick, 500); tick();
+  </script>
+</body>
+</html>

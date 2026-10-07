@@ -1,0 +1,12 @@
+# Real databases for the store conformance suite:
+#   docker compose -f deploy/docker-compose.test-stores.yml up -d
+#   npm i --no-save pg ioredis        # drivers are NOT dependencies of this repo
+#   PG_URL=postgres://otpf:otpf@127.0.0.1:55432/otpf REDIS_URL=redis://127.0.0.1:56379 npm run test:stores
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: otpf, POSTGRES_PASSWORD: otpf, POSTGRES_DB: otpf }
+    ports: ["127.0.0.1:55432:5432"]
+  redis:
+    image: redis:7-alpine
+    ports: ["127.0.0.1:56379:6379"]

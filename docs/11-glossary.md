@@ -1,0 +1,14 @@
+# Glossary
+- **OTP** one-time password. **HOTP** counter-based. **TOTP** time-based.
+- **Pepper** server-side secret mixed into hashes (not stored in the DB). **Salt** per-record random value.
+- **AAD** additional authenticated data - context bound into an AEAD ciphertext.
+- **AEAD** authenticated encryption with associated data (AES-GCM).
+- **HKDF** key-derivation function that splits one key into independent sub-keys.
+- **Replay attack** reusing a previously valid code.
+- **MFA fatigue** spamming push prompts until the victim taps "approve".
+- **Number matching** user must pick the number shown on the login screen.
+- **Step-up auth** extra proof demanded only for sensitive actions.
+- **Dynamic linking** binding an authentication code to specific transaction details.
+- **Circuit breaker** temporarily skipping a failing dependency.
+- **Idempotency key** client-chosen id making a retried request safe.
+- **Credential stuffing** trying leaked username/password pairs across many accounts.

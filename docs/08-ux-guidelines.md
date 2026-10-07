@@ -1,0 +1,11 @@
+# UX guidelines that also improve security
+- Use `autocomplete="one-time-code"` and `inputmode="numeric"`; let the OS autofill SMS codes (origin-bound format helps).
+- Accept spaces, dashes and non-Latin digits (`normalizeNumericInput`). Display codes grouped: `482 913`.
+- Say **why** you are asking ("Confirming it's you before changing your email").
+- Show remaining attempts and the lockout time. Never reveal whether an account exists (same message for unknown users).
+- Resend button: enforce a cooldown (30-60 s) *and* the server-side limiter; a resend invalidates the previous code.
+- Mask destinations (`a***@example.com`, `+91******10`).
+- Backup codes: show once, offer copy/download/print, require the user to tick "I saved these".
+- Push approvals: show location, device, time, and the number to match; add a "This wasn't me" button that locks the account.
+- Tell users about every security change by email/push (new device, 2FA disabled, recovery started).
+- Accessibility: voice OTP option, no time pressure beyond the TTL, screen-reader-friendly code fields (`aria-live`).

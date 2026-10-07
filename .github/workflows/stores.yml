@@ -1,0 +1,27 @@
+name: stores
+# Runs the store conformance suite against REAL Postgres and Redis (the local test run uses a fake driver for Postgres).
+on: [push, pull_request]
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: otpf, POSTGRES_PASSWORD: otpf, POSTGRES_DB: otpf }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U otpf" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-save pg ioredis        # drivers are intentionally NOT dependencies of the repo
+      - run: npm run test:stores
+        env:
+          PG_URL: postgres://otpf:otpf@127.0.0.1:5432/otpf
+          REDIS_URL: redis://127.0.0.1:6379

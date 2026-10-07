@@ -1,0 +1,42 @@
+# TEMPLATE - review before use. Create the secret first:
+#   kubectl create secret generic otp-fortress --from-literal=OTP_MASTER_KEY=... --from-literal=OTP_PEPPER=... --from-literal=OTP_API_KEY=...
+# NOTE: with replicas > 1 you MUST use a shared atomic store (e.g. Redis/SQL), not the file store.
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: otp-fortress }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: otp-fortress } }
+  template:
+    metadata: { labels: { app: otp-fortress } }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 1000, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: otp
+          image: otp-fortress:latest
+          ports: [{ containerPort: 8080 }]
+          envFrom: [{ secretRef: { name: otp-fortress } }]
+          env: [{ name: NODE_ENV, value: production }]
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
+          readinessProbe: { httpGet: { path: /health, port: 8080 } }
+          livenessProbe: { httpGet: { path: /health, port: 8080 }, initialDelaySeconds: 10 }
+          resources: { requests: { cpu: 50m, memory: 64Mi }, limits: { memory: 256Mi } }
+          volumeMounts: [{ name: data, mountPath: /data }]
+      volumes: [{ name: data, emptyDir: {} }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: otp-fortress }
+spec:
+  selector: { app: otp-fortress }
+  ports: [{ port: 80, targetPort: 8080 }]
+---
+# Only your backend pods may call the OTP API.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: otp-fortress-ingress }
+spec:
+  podSelector: { matchLabels: { app: otp-fortress } }
+  ingress:
+    - from: [{ podSelector: { matchLabels: { role: backend } } }]
+      ports: [{ port: 8080 }]

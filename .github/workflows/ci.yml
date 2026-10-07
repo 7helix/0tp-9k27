@@ -1,0 +1,18 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: { node: [20, 22] }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ matrix.node }}" }
+      - run: npm test
+      - run: node scripts/verify-repo.js
+      - run: cd ports/python && python3 -m unittest
+      - run: npm run mutation
+        if: matrix.node == 22
+      - run: FUZZ_SEED=$RANDOM npm test
+        if: matrix.node == 22
